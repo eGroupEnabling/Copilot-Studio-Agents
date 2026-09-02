@@ -84,29 +84,7 @@ Before building the agents, create the **AI Use Case Inventory** list in your Sh
 | Follow Up Questions | Multi-line Text | No | Clarification questions |
 | Additional Use Case Notes | Multi-line Text | No | Internal team notes |
 
-### Step 2: Configure SharePoint Connection in Copilot Studio
-
-Both agents need read/write access to the AI Use Case Inventory list.
-
-1. **Open Copilot Studio** and navigate to your environment
-2. **Go to Settings > Connections**
-3. **Add a SharePoint connection**:
-   - Select **SharePoint** from available connectors
-   - Authenticate with your Microsoft 365 account
-   - Authorize Copilot Studio to access SharePoint
-4. **Note the connection name** (you'll reference this in both agents, e.g., "SharePoint - AI Hub")
-
-### Step 3: Configure Email Connection (Outlook)
-
-The AI Use Case Evaluator agent sends email notifications.
-
-1. **In Copilot Studio**, go to **Settings > Connections**
-2. **Add an Office 365 Outlook connection** (or Mail connector)
-   - Authenticate with your Microsoft 365 account
-   - Authorize sending emails
-3. **Note the connection name** (e.g., "Outlook - Corporate")
-
-### Step 4: Build Agent 1 – Work Improvement Idea Intake
+### Step 2: Build Agent 1 – Work Improvement Idea Intake
 
 This agent collects new use case ideas conversationally and writes them to SharePoint.
 
@@ -125,28 +103,13 @@ This agent collects new use case ideas conversationally and writes them to Share
    - Replace `AI Hub` with your actual SharePoint site name
    - Replace `ai.hub@yourtenant.com` or similar with your actual SharePoint URL path
 
-#### Add Topics (Conversational Flows)
+#### Configure Agent Tools and Knowledge
 
-Create a **topic** named "Collect Idea" that:
+This is a generative agent. Configure it without adding topics:
 
-1. **Triggers** on: User initiates conversation with "I have an idea" or similar
-2. **Flow**:
-   - Greet user and explain purpose
-   - Ask for submitter's name (mandatory)
-   - Collect core details:
-     - Business opportunity/challenge
-     - Affected personas
-     - Success criteria
-   - Optionally offer follow-up questions
-   - Summarize and confirm
-   - **Write to SharePoint list** using a "Send an HTTP Request" action or **SharePoint connector**:
-     - **Action**: "Create item" on the AI Use Case Inventory list
-     - **Map fields**:
-       - Use Case Name → collected idea title
-       - Description → detailed description
-       - Owner/Point of Contact → submitter name
-       - Persona(s) → affected users
-       - Additional fields as collected
+1. In the **Model Context Protocol** section, add the **SharePoint (Preview)** tool.
+2. In the **Knowledge** section, add the **AI Use Case Inventory** SharePoint list.
+3. Disable **Web Search** for this agent.
 
 #### Test Locally
 
@@ -154,7 +117,7 @@ Create a **topic** named "Collect Idea" that:
 2. **Walk through the flow** and verify SharePoint item is created
 3. **Check the AI Use Case Inventory list** to confirm the new item appears
 
-### Step 5: Build Agent 2 – AI Use Case Evaluator
+### Step 3: Build Agent 2 – AI Use Case Evaluator
 
 This agent automatically evaluates new submissions and sends notifications.
 
@@ -173,48 +136,15 @@ This agent automatically evaluates new submissions and sends notifications.
    - Replace `AI Hub` with your actual SharePoint site name
    - Replace `kai.andrews@egroup-us.com` with your IT review contact email
 
-#### Add Topics (Automated Flows)
+#### Configure Agent Tools, Knowledge, and Trigger
 
-Create a **topic** named "Evaluate New Submission" that:
+This is a generative agent. Configure it without adding topics:
 
-1. **Triggers** on: New item created in AI Use Case Inventory list
-   - Use **SharePoint trigger**: "When an item is created"
-   - Select the AI Use Case Inventory list
-   
-2. **Flow**:
-   - **Read** the new item's fields from SharePoint
-   - **Analyze** the submission:
-     - Suggest technical solution options (Copilot Chat, Copilot Studio, Azure AI Services, etc.)
-     - Identify empty required fields
-     - Generate follow-up questions for clarification
-     - Assign priority class (1 - Top Priority, 2 - Next Steps, 3 - Longer Term)
-     - Calculate complexity and feasibility rankings
-   - **Update SharePoint item** with enriched data:
-     - "Technical Solution Options" → recommended platforms
-     - "Follow Up Questions" → clarification questions
-     - "Priority Class" → assigned priority
-     - "Complexity Rank", "Feasibility Rank" → rankings
-   - **Send confirmation email** to submitter:
-     - Subject: "Thank you for your AI use case submission"
-     - Body: Thank you message (reference: `work-improvement-idea-intake.md` interaction example)
-   - **Send notification email** to IT stakeholder:
-     - To: Configured email address (e.g., Kai Andrews)
-     - Subject: "New AI Use Case Ready for Review"
-     - Body: Include submission summary and evaluation details
-
-#### Configure Email Actions
-
-1. **For submitter confirmation**:
-   - **Use Outlook connector**: "Send an email"
-   - **To**: `[Owner/Point of Contact Email]` (from SharePoint item)
-   - **Subject**: "Thank you for your AI use case submission"
-   - **Body**: Confirmation message
-
-2. **For IT notification**:
-   - **Use Outlook connector**: "Send an email"
-   - **To**: `kai.andrews@egroup-us.com` (or your IT contact)
-   - **Subject**: "New AI Use Case Ready for Review – [Use Case Name]"
-   - **Body**: Include use case details and evaluation results
+1. In the **Knowledge** section, add the **AI Use Case Inventory** SharePoint list.
+2. Enable **Web Search**.
+3. In the **Model Context Protocol** section, add the **Mail (Preview)** and **SharePoint (Preview)** tools.
+4. Configure each tool to run under the **Maker credentials**.
+5. In **Triggers**, add the SharePoint **When an item is created** trigger and select the **AI Use Case Inventory** list.
 
 #### Test Trigger
 
@@ -225,17 +155,7 @@ Create a **topic** named "Evaluate New Submission" that:
    - Confirmation email sent to submitter
    - IT notification email sent
 
-### Step 6: Configure Connections in Agent Settings
-
-For each agent:
-
-1. **Open agent settings**
-2. **Connection references**:
-   - **SharePoint connection**: Select the connection created in Step 2
-   - **Outlook connection**: Select the connection created in Step 3
-3. **Save and publish**
-
-### Step 7: Deploy & Publish
+### Step 4: Deploy & Publish
 
 1. **In Copilot Studio**, publish each agent:
    - Click **Publish** button
@@ -251,7 +171,7 @@ For each agent:
    - Review SharePoint list for new submissions
    - Verify emails are being sent successfully
 
-### Step 8: Optional – Integrate with Teams
+### Step 5: Optional – Integrate with Teams
 
 1. **Share the agent** with your Microsoft Teams environment:
    - Copilot Studio → Agent → **Share**
@@ -275,22 +195,22 @@ Both agents contain detailed guidelines, skills, step-by-step workflows, and int
 
 ## Troubleshooting
 
-### SharePoint Connection Issues
+### SharePoint Tool Issues
 
 - **Verify permissions**: Ensure your account has read/write access to the AI Use Case Inventory list
-- **Test connection**: In Copilot Studio, test the SharePoint connector with a simple "Get items" action
+- **Test the tool**: Confirm the **SharePoint (Preview)** tool is attached to the agent and configured to run under the Maker credentials
 - **Check list name**: Confirm the exact name matches (case-sensitive in some cases)
 
-### Email Not Sending
+### Mail Not Sending
 
-- **Verify Outlook connection**: Ensure the email account has sufficient permissions
+- **Verify the tool**: Confirm the **Mail (Preview)** tool is attached to the evaluator and configured to run under the Maker credentials
 - **Check recipient email**: Confirm email addresses are correctly mapped from SharePoint
 - **Monitor runs**: Check Copilot Studio Analytics for error details in failed agent runs
 
 ### Agent Not Triggering
 
 - **SharePoint trigger**: Confirm the "When an item is created" trigger is active
-- **Verify flow conditions**: Ensure no conditional logic is blocking the flow
+- **Verify the list**: Ensure the trigger points to the AI Use Case Inventory list
 - **Check agent status**: Ensure the agent is published and active
 
 ---
